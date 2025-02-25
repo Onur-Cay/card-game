@@ -1,0 +1,31 @@
+/* app/comingsoon.module.css */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  text-align: center;
+}
+.content {
+  max-width: 600px;
+}
+.title {
+  font-size: 3em;
+  margin-bottom: 0.5em;
+}
+.description {
+  font-size: 1.2em;
+  margin-bottom: 1.5em;
+}
+.socialLinks a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #fff;
+  font-size: 2em;
+}
+.socialLinks a:hover {
+  color: black;
+}

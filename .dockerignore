@@ -1,0 +1,25 @@
+# Node modules directory
+node_modules
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+*.tmp
+
+# Build output
+dist
+build
+
+# Git repository files
+.git
+.gitignore
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Environment variables
+.env
