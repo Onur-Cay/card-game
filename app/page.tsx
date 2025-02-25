@@ -19,7 +19,7 @@ const ComingSoonPage = () => {
             LinkedIn
           </a>
           <a
-            href="https://github.com/your-username"
+            href="https://github.com/Onur-Cay/card-game"
             target="_blank"
             rel="noopener noreferrer"
           >
