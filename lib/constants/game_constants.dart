@@ -1,0 +1,1 @@
+//This is where the game constants are defined. Colours, enums, sizes, etc.
