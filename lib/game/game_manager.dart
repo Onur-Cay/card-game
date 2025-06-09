@@ -197,4 +197,109 @@ class GameManager {
   }
 
   GameState get gameState => _gameState;
+
+  bool drawCard(Player player) {
+    if (_gameState.currentPhase != GamePhase.playing) {
+      return false;
+    }
+
+    if (player != _gameState.currentPlayer) {
+      return false;
+    }
+
+    if (_gameState.drawPile.isEmpty) {
+      return false;
+    }
+
+    player.addToHand(_gameState.drawPile.removeLast());
+    _gameState.nextTurn();
+    return true;
+  }
+
+  // Method to get legal moves for a player
+  List<Map<String, dynamic>> getLegalMoves(Player player) {
+    List<Map<String, dynamic>> legalMoves = [];
+    final topCard = _gameState.topCard;
+
+    // Check playable cards from hand
+    for (final card in player.hand) {
+      if (topCard == null || card.canPlayOn(topCard)) {
+        legalMoves.add({'type': 'play_hand', 'card': card});
+      }
+    }
+
+    // Check playable face-up cards
+    for (final card in player.faceUpCards) {
+       if (topCard == null || card.canPlayOn(topCard)) {
+        legalMoves.add({'type': 'play_face_up', 'card': card});
+      }
+    }
+
+    // If no legal moves from hand or face-up, check face-down or pick up pile
+    if (legalMoves.isEmpty) {
+      if (player.faceDownCards.isNotEmpty) {
+        // Can always attempt to play a face-down card if no other moves are available
+        // The legality check for face-down is done after revealing the card,
+        // so we list playing *any* face-down card as a potential move if hand/face-up are not playable.
+        for (var i = 0; i < player.faceDownCards.length; i++) {
+           legalMoves.add({'type': 'play_face_down', 'index': i});
+        }
+      } else {
+         // If no hand, face-up, or face-down cards, the only move is to pick up
+         // If there are face-down cards but none in hand/face-up are playable, picking up is also an option.
+         // For a simple bot, if no hand/face-up are playable, it can either play face-down or pick up.
+         // Let's make picking up an option if no hand/face-up cards are playable.
+          legalMoves.add({'type': 'pick_up_pile'});
+      }
+    }
+     // If there are playable cards from hand or face-up, picking up is also a legal move, but a bot playing randomly might not want to do this unless forced.
+     // For a simple random bot, we prioritize playing a card if possible.
+     // However, if there are no hand/face-up cards, picking up is the fallback if no face-down cards or if face-down play fails.
+
+
+
+    return legalMoves;
+  }
+
+  // Method for a bot player to take a turn
+  void takeBotTurn(Player player) {
+    if (_gameState.currentPhase != GamePhase.playing || player != _gameState.currentPlayer) {
+      // Not the bot's turn or not in playing phase
+      return;
+    }
+
+    final legalMoves = getLegalMoves(player);
+
+    if (legalMoves.isEmpty) {
+      // Should not happen if logic is correct, but as a fallback:
+      // If no legal moves found, the bot should pick up the pile.
+       pickUpDiscardPile(player);
+       return;
+    }
+
+    // Select a random legal move
+    final randomMove = legalMoves[_random.nextInt(legalMoves.length)];
+
+    // Execute the selected move
+    if (randomMove['type'] == 'play_hand') {
+      playCard(player, randomMove['card']);
+    } else if (randomMove['type'] == 'play_face_up') {
+      // Find the index of the face-up card
+      final cardToPlay = randomMove['card'];
+      final index = player.faceUpCards.indexOf(cardToPlay);
+      if (index != -1) {
+        playCard(player, cardToPlay); // playCard handles removing from faceUpCards now
+      } else {
+         // This case indicates a logic error in getLegalMoves or player state.
+         // As a fallback, pick up the pile.
+         pickUpDiscardPile(player);
+      }
+    } else if (randomMove['type'] == 'play_face_down') {
+      final index = randomMove['index'];
+      // playFaceDownCard handles the legality check after revealing
+      playFaceDownCard(player, index);
+    } else if (randomMove['type'] == 'pick_up_pile') {
+      pickUpDiscardPile(player);
+    }
+  }
 }

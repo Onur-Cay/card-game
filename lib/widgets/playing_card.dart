@@ -11,6 +11,8 @@
 /// - Optional interactivity such as tap-to-select or drag-and-drop
 /// - Visual states (e.g., selected, hovered, disabled)
 /// - Flexible sizing or aspect ratio based on screen/device
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -18,19 +20,13 @@ class PlayingCard extends StatelessWidget {
   final String assetName; // e.g. 'AS.svg'
   final double width;
 
-  const PlayingCard({
-    super.key,
-    required this.assetName,
-    this.width = 160,
-  });
+  const PlayingCard({super.key, required this.assetName, this.width = 160});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: width,
         decoration: BoxDecoration(
@@ -40,10 +36,7 @@ class PlayingCard extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [Colors.white, Colors.grey.shade100],
           ),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),

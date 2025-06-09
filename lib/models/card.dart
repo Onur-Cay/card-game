@@ -9,22 +9,35 @@
 ///
 /// This model is used by the game logic to build decks, deal hands,
 /// compare card values, and generate asset paths for UI rendering.
+library;
 
 enum Suit { spades, hearts, diamonds, clubs }
-enum Rank { ace, two, three, four, five, six, seven, eight, nine, ten, jack, queen, king }
+
+enum Rank {
+  ace,
+  two,
+  three,
+  four,
+  five,
+  six,
+  seven,
+  eight,
+  nine,
+  ten,
+  jack,
+  queen,
+  king,
+}
 
 class GameCard {
   final Suit suit;
   final Rank rank;
   bool isFaceUp;
 
-  GameCard({
-    required this.suit,
-    required this.rank,
-    this.isFaceUp = true,
-  });
+  GameCard({required this.suit, required this.rank, this.isFaceUp = true});
 
-  bool get isSpecial => rank == Rank.two || rank == Rank.seven || rank == Rank.ten;
+  bool get isSpecial =>
+      rank == Rank.two || rank == Rank.seven || rank == Rank.ten;
 
   bool canPlayOn(GameCard other) {
     if (isSpecial) {
@@ -33,11 +46,11 @@ class GameCard {
       }
       return true; // Other special cards can be played anytime
     }
-    
+
     if (other.rank == Rank.seven) {
       return rank.index < Rank.seven.index;
     }
-    
+
     return rank.index > other.rank.index;
   }
 

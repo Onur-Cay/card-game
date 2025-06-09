@@ -10,9 +10,10 @@ class CardPile extends StatelessWidget {
   final double width;
   final double height;
   final double cardOffset;
+  final bool isDraggable;
 
   const CardPile({
-    Key? key,
+    super.key,
     required this.cards,
     this.isFaceUp = true,
     this.canAcceptCards = false,
@@ -21,15 +22,16 @@ class CardPile extends StatelessWidget {
     this.width = 100,
     this.height = 140,
     this.cardOffset = 20,
-  }) : super(key: key);
+    this.isDraggable = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return DragTarget<game.GameCard>(
-      onWillAccept: (card) => canAcceptCards && card != null,
-      onAccept: (card) => onCardDropped?.call(card),
+      onWillAcceptWithDetails: (card) => canAcceptCards && card != null,
+      onAcceptWithDetails: (card) => onCardDropped?.call(card.data),
       builder: (context, candidateCards, rejectedCards) {
-        return Container(
+        return SizedBox(
           width: width,
           height: height + (cards.length - 1) * cardOffset,
           child: Stack(
@@ -37,25 +39,78 @@ class CardPile extends StatelessWidget {
               for (var i = 0; i < cards.length; i++)
                 Positioned(
                   top: i * cardOffset,
-                  child: GestureDetector(
-                    onTap: () => onCardTapped?.call(i),
-                    child: Card(
-                      elevation: 4,
-                      child: Container(
-                        width: width,
-                        height: height,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: DecorationImage(
-                            image: AssetImage(
-                              isFaceUp ? cards[i].assetPath : 'cards/large/card_back.png',
+                  child: isDraggable
+                      ? Draggable<game.GameCard>(
+                          data: cards[i],
+                          feedback: Material(
+                            elevation: 8,
+                            child: Container(
+                              width: width,
+                              height: height,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                    isFaceUp
+                                        ? cards[i].assetPath
+                                        : 'cards/large/card_back.png',
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                            fit: BoxFit.cover,
+                          ),
+                          childWhenDragging: Container(
+                            width: width,
+                            height: height,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onTap: () => onCardTapped?.call(i),
+                            child: Card(
+                              elevation: 4,
+                              child: Container(
+                                width: width,
+                                height: height,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: DecorationImage(
+                                    image: AssetImage(
+                                      isFaceUp
+                                          ? cards[i].assetPath
+                                          : 'cards/large/card_back.png',
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : GestureDetector(
+                          onTap: () => onCardTapped?.call(i),
+                          child: Card(
+                            elevation: 4,
+                            child: Container(
+                              width: width,
+                              height: height,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                    isFaceUp
+                                        ? cards[i].assetPath
+                                        : 'cards/large/card_back.png',
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
             ],
           ),
@@ -63,4 +118,4 @@ class CardPile extends StatelessWidget {
       },
     );
   }
-} 
+}

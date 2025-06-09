@@ -10,14 +10,14 @@ class DraggableCard extends StatelessWidget {
   final double height;
 
   const DraggableCard({
-    Key? key,
+    super.key,
     required this.card,
     this.isFaceUp = true,
     this.isDraggable = true,
     this.onTap,
     this.width = 100,
     this.height = 140,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,18 +44,9 @@ class DraggableCard extends StatelessWidget {
 
     return Draggable<game.GameCard>(
       data: card,
-      feedback: Transform.scale(
-        scale: 1.1,
-        child: cardWidget,
-      ),
-      childWhenDragging: Opacity(
-        opacity: 0.5,
-        child: cardWidget,
-      ),
-      child: GestureDetector(
-        onTap: onTap,
-        child: cardWidget,
-      ),
+      feedback: Transform.scale(scale: 1.1, child: cardWidget),
+      childWhenDragging: Opacity(opacity: 0.5, child: cardWidget),
+      child: GestureDetector(onTap: onTap, child: cardWidget),
     );
   }
-} 
+}
