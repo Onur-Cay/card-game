@@ -13,6 +13,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
     TextEditingController(),
     TextEditingController(),
   ];
+  final List<bool> _isBot = [false, false]; // Track which players are bots
 
   @override
   void dispose() {
@@ -25,15 +26,15 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
   void _addPlayer() {
     setState(() {
       _controllers.add(TextEditingController());
+      _isBot.add(false);
     });
   }
 
   void _addBotPlayer() {
     setState(() {
-      final botCount = _controllers
-          .where((controller) => controller.text.startsWith('Bot'))
-          .length;
+      final botCount = _isBot.where((isBot) => isBot).length;
       _controllers.add(TextEditingController(text: 'Bot ${botCount + 1}'));
+      _isBot.add(true);
     });
   }
 
@@ -42,9 +43,10 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
       setState(() {
         // Find the last non-bot player
         for (int i = _controllers.length - 1; i >= 0; i--) {
-          if (!_controllers[i].text.startsWith('Bot')) {
+          if (!_isBot[i]) {
             _controllers[i].dispose();
             _controllers.removeAt(i);
+            _isBot.removeAt(i);
             break;
           }
         }
@@ -57,9 +59,10 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
       setState(() {
         // Find the last bot player
         for (int i = _controllers.length - 1; i >= 0; i--) {
-          if (_controllers[i].text.startsWith('Bot')) {
+          if (_isBot[i]) {
             _controllers[i].dispose();
             _controllers.removeAt(i);
+            _isBot.removeAt(i);
             break;
           }
         }
@@ -121,16 +124,36 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                     children: List.generate(_controllers.length, (index) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
-                        child: TextField(
-                          controller: _controllers[index],
-                          maxLength: 27,
-                          decoration: InputDecoration(
-                            labelText: 'Player ${index + 1}',
-                            border: const OutlineInputBorder(),
-                            counterText: '', // Hide the character counter
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        child: _isBot[index]
+                            ? Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  _controllers[index].text,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              )
+                            : TextField(
+                                controller: _controllers[index],
+                                maxLength: 27,
+                                decoration: InputDecoration(
+                                  labelText: 'Player ${index + 1}',
+                                  border: const OutlineInputBorder(),
+                                  counterText: '', // Hide the character counter
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                       );
                     }),
                   ),
@@ -162,11 +185,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed:
-                          _controllers
-                                  .where((c) => !c.text.startsWith('Bot'))
-                                  .length >
-                              1
+                      onPressed: _isBot.where((isBot) => !isBot).length > 1
                           ? _removePlayer
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -179,12 +198,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed:
-                          _controllers
-                              .where((c) => c.text.startsWith('Bot'))
-                              .isNotEmpty
-                          ? _removeBot
-                          : null,
+                      onPressed: _isBot.contains(true) ? _removeBot : null,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
