@@ -1,121 +1,110 @@
 import 'package:flutter/material.dart';
 import '../models/card.dart' as game;
+import '../models/game_state.dart';
+import '../models/player.dart';
 
 class CardPile extends StatelessWidget {
   final List<game.GameCard> cards;
-  final bool isFaceUp;
-  final bool canAcceptCards;
-  final Function(game.GameCard)? onCardDropped;
-  final Function(int)? onCardTapped;
   final double width;
   final double height;
-  final double cardOffset;
+  final bool isFaceUp;
   final bool isDraggable;
+  final bool canAcceptCards;
+  final Function(game.GameCard)? onCardDropped;
+  final GameState? gameState;
+  final Player? owner;
+  final double cardOffset;
 
   const CardPile({
     super.key,
     required this.cards,
-    this.isFaceUp = true,
+    required this.width,
+    required this.height,
+    required this.isFaceUp,
+    this.isDraggable = false,
     this.canAcceptCards = false,
     this.onCardDropped,
-    this.onCardTapped,
-    this.width = 100,
-    this.height = 140,
-    this.cardOffset = 20,
-    this.isDraggable = false,
+    this.gameState,
+    this.owner,
+    this.cardOffset = 0.0,
   });
+
+  bool get _canDrag {
+    if (!isDraggable) return false;
+    if (gameState == null) return true;
+    
+    // Don't allow dragging during swapping phase
+    if (gameState!.currentPhase == GamePhase.swapping) return false;
+    
+    // Only allow dragging if it's the owner's turn
+    if (owner != null && gameState!.currentPlayer != owner) return false;
+    
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<game.GameCard>(
-      onWillAcceptWithDetails: (card) => canAcceptCards && card != null,
-      onAcceptWithDetails: (card) => onCardDropped?.call(card.data),
-      builder: (context, candidateCards, rejectedCards) {
-        return SizedBox(
-          width: width,
-          height: height + (cards.length - 1) * cardOffset,
-          child: Stack(
-            children: [
-              for (var i = 0; i < cards.length; i++)
-                Positioned(
-                  top: i * cardOffset,
-                  child: isDraggable
-                      ? Draggable<game.GameCard>(
-                          data: cards[i],
-                          feedback: Material(
-                            elevation: 8,
-                            child: Container(
-                              width: width,
-                              height: height,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                    isFaceUp
-                                        ? cards[i].assetPath
-                                        : 'cards/large/card_back.png',
-                                  ),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                          childWhenDragging: Container(
-                            width: width,
-                            height: height,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: () => onCardTapped?.call(i),
-                            child: Card(
-                              elevation: 4,
-                              child: Container(
-                                width: width,
-                                height: height,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  image: DecorationImage(
-                                    image: AssetImage(
-                                      isFaceUp
-                                          ? cards[i].assetPath
-                                          : 'cards/large/card_back.png',
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: () => onCardTapped?.call(i),
-                          child: Card(
-                            elevation: 4,
-                            child: Container(
-                              width: width,
-                              height: height,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                    isFaceUp
-                                        ? cards[i].assetPath
-                                        : 'cards/large/card_back.png',
-                                  ),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+    if (cards.isEmpty) {
+      return SizedBox(width: width, height: height);
+    }
+
+    final card = cards.first;
+    return Draggable<game.GameCard>(
+      data: _canDrag ? card : null,
+      feedback: Transform.scale(
+        scale: 1.1,
+        child: Card(
+          elevation: 4,
+          child: Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: AssetImage(
+                  isFaceUp ? card.assetPath : 'cards/large/card_back.png',
                 ),
-            ],
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        );
-      },
+        ),
+      ),
+      childWhenDragging: Opacity(
+        opacity: 0.5,
+        child: Card(
+          elevation: 4,
+          child: Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: AssetImage(
+                  isFaceUp ? card.assetPath : 'cards/large/card_back.png',
+                ),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+      ),
+      child: Card(
+        elevation: 4,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            image: DecorationImage(
+              image: AssetImage(
+                isFaceUp ? card.assetPath : 'cards/large/card_back.png',
+              ),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

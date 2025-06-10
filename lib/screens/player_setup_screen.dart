@@ -11,9 +11,9 @@ class PlayerSetupScreen extends StatefulWidget {
 class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
   final List<TextEditingController> _controllers = [
     TextEditingController(),
-    TextEditingController(),
+    TextEditingController(text: 'Bot 1'),
   ];
-  final List<bool> _isBot = [false, false]; // Track which players are bots
+  final List<bool> _isBot = [false, true]; // First is player, second is bot
 
   @override
   void dispose() {
@@ -23,39 +23,18 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
     super.dispose();
   }
 
-  void _addPlayer() {
-    setState(() {
-      _controllers.add(TextEditingController());
-      _isBot.add(false);
-    });
-  }
-
   void _addBotPlayer() {
-    setState(() {
-      final botCount = _isBot.where((isBot) => isBot).length;
-      _controllers.add(TextEditingController(text: 'Bot ${botCount + 1}'));
-      _isBot.add(true);
-    });
-  }
-
-  void _removePlayer() {
-    if (_controllers.length > 2) {
+    if (_controllers.length < 5) {
       setState(() {
-        // Find the last non-bot player
-        for (int i = _controllers.length - 1; i >= 0; i--) {
-          if (!_isBot[i]) {
-            _controllers[i].dispose();
-            _controllers.removeAt(i);
-            _isBot.removeAt(i);
-            break;
-          }
-        }
+        final botCount = _isBot.where((isBot) => isBot).length;
+        _controllers.add(TextEditingController(text: 'Bot ${botCount + 1}'));
+        _isBot.add(true);
       });
     }
   }
 
   void _removeBot() {
-    if (_controllers.length > 2) {
+    if (_isBot.where((isBot) => isBot).length > 1) {
       setState(() {
         // Find the last bot player
         for (int i = _controllers.length - 1; i >= 0; i--) {
@@ -75,19 +54,11 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
         .map((controller) => controller.text.trim())
         .toList();
 
-    // Check if any player name is empty
-    if (playerNames.any((name) => name.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter names for all players')),
-      );
-      return;
-    }
-
-    // Check if we have at least 2 players
-    if (playerNames.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter at least 2 player names')),
-      );
+    // Check if player name is empty
+    if (playerNames[0].isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter your name')));
       return;
     }
 
@@ -114,12 +85,12 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'Enter Player Names',
+                  'Enter Your Name',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
-                  width: 300, // Fixed width for text fields
+                  width: 300,
                   child: Column(
                     children: List.generate(_controllers.length, (index) {
                       return Padding(
@@ -148,9 +119,9 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                                 controller: _controllers[index],
                                 maxLength: 27,
                                 decoration: InputDecoration(
-                                  labelText: 'Player ${index + 1}',
+                                  labelText: 'Your Name',
                                   border: const OutlineInputBorder(),
-                                  counterText: '', // Hide the character counter
+                                  counterText: '',
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -163,17 +134,6 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
-                      onPressed: _controllers.length < 5 ? _addPlayer : null,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                      ),
-                      child: const Text('Add Player'),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
                       onPressed: _controllers.length < 5 ? _addBotPlayer : null,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
@@ -185,20 +145,9 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed: _isBot.where((isBot) => !isBot).length > 1
-                          ? _removePlayer
+                      onPressed: _isBot.where((isBot) => isBot).length > 1
+                          ? _removeBot
                           : null,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                      ),
-                      child: const Text('Remove Player'),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: _isBot.contains(true) ? _removeBot : null,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,

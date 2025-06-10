@@ -23,7 +23,7 @@ class SeatLayout {
   final bool isDeckArea;
   final double deckSpacing;
   final double textRotation; // Rotation for player name and card count
-  final bool textOnLeft; // Whether text should be on left side of cards
+  final bool textAbove; // Whether text should be above the cards
 
   const SeatLayout({
     required this.alignment,
@@ -32,7 +32,7 @@ class SeatLayout {
     this.isDeckArea = false,
     this.deckSpacing = 0.0,
     this.textRotation = 0.0,
-    this.textOnLeft = false,
+    this.textAbove = true,
   });
 }
 
@@ -42,9 +42,7 @@ class PlayerLayer extends GameLayer {
   final Function(Player, int, game.GameCard) onCardSwap;
   final Function(Player, int) onFaceDownCardPlay;
   final Function(Player, game.GameCard) onCardPlay;
-  final double cardWidth;
-  final double cardHeight;
-  final double spacing;
+  final double scaleFactor;
   final double padding;
   final Size screenSize;
 
@@ -55,9 +53,7 @@ class PlayerLayer extends GameLayer {
     required this.onCardSwap,
     required this.onFaceDownCardPlay,
     required this.onCardPlay,
-    required this.cardWidth,
-    required this.cardHeight,
-    required this.spacing,
+    required this.scaleFactor,
     required this.padding,
     required this.screenSize,
   });
@@ -80,10 +76,7 @@ class PlayerLayer extends GameLayer {
 
   @override
   Widget buildLayer(BuildContext context) {
-    final scaleFactor = _getCardScaleFactor();
-    final scaledCardWidth = cardWidth * scaleFactor;
-    final scaledCardHeight = cardHeight * scaleFactor;
-    final scaledSpacing = spacing * scaleFactor;
+    final playerScaleFactor = _getCardScaleFactor() * scaleFactor;
 
     final layouts = _getSeatLayouts();
     return Stack(
@@ -96,22 +89,14 @@ class PlayerLayer extends GameLayer {
           child: PlayerArea(
             player: currentPlayer,
             isCurrentPlayer: true,
-            cardWidth: scaledCardWidth,
-            cardHeight: scaledCardHeight,
-            spacing: scaledSpacing,
+            scaleFactor: playerScaleFactor,
             onFaceDownCardTap: onFaceDownCardPlay,
             onFaceUpCardTap: onCardSwap,
             onHandCardTap: onCardPlay,
           ),
         ),
         // Opponent players
-        ..._buildOpponentPositions(
-          context,
-          layouts,
-          scaledCardWidth,
-          scaledCardHeight,
-          scaledSpacing,
-        ),
+        ..._buildOpponentPositions(context, layouts, playerScaleFactor),
       ],
     );
   }
@@ -123,7 +108,7 @@ class PlayerLayer extends GameLayer {
 
     // Calculate offsets based on screen size
     final topOffset = screenHeight * 0.1; // 10% from top
-    final sideOffset = screenWidth * 0.3; // 10% from sides
+    final sideOffset = screenWidth * 0.1; // 10% from sides
 
     switch (playerCount) {
       case 2:
@@ -133,6 +118,7 @@ class PlayerLayer extends GameLayer {
             alignment: Alignment.topCenter,
             rotation: math.pi,
             textRotation: math.pi,
+            textAbove: true,
             offset: Offset(0, 0),
           ), // Opponent
         ];
@@ -141,17 +127,17 @@ class PlayerLayer extends GameLayer {
           SeatLayout(alignment: Alignment.bottomCenter, rotation: 0),
           SeatLayout(
             alignment: Alignment.topLeft,
-            rotation: 2.35619,
-            textRotation: -(math.pi / 180) * 180,
-            textOnLeft: false,
-            offset: Offset(-sideOffset, topOffset),
+            rotation: -(math.pi / 180) * 45,
+            textRotation: 0,
+            textAbove: true,
+            offset: Offset(-screenWidth * 0.04, screenHeight * 0.15),
           ),
           SeatLayout(
             alignment: Alignment.topRight,
-            rotation: 3.92699,
-            textRotation: (math.pi / 180) * 180,
-            textOnLeft: false,
-            offset: Offset(sideOffset, topOffset),
+            rotation: (math.pi / 180) * 45,
+            textRotation: 0,
+            textAbove: true,
+            offset: Offset(screenWidth * 0.04, screenHeight * 0.15),
           ),
         ];
       case 4:
@@ -161,21 +147,22 @@ class PlayerLayer extends GameLayer {
             alignment: Alignment.topCenter,
             rotation: math.pi,
             textRotation: math.pi,
+            textAbove: true,
             offset: Offset(0, 0),
           ),
           SeatLayout(
             alignment: Alignment.centerLeft,
             rotation: (math.pi / 180) * 90,
             textRotation: -(math.pi / 180) * 90,
-            textOnLeft: false,
-            offset: Offset(-sideOffset * 1.3, 0),
+            textAbove: true,
+            offset: Offset(-screenWidth * 0.1, 0),
           ),
           SeatLayout(
             alignment: Alignment.centerRight,
             rotation: -(math.pi / 180) * 90,
             textRotation: (math.pi / 180) * 90,
-            textOnLeft: false,
-            offset: Offset(sideOffset * 1.3, 0),
+            textAbove: true,
+            offset: Offset(screenWidth * 0.1, 0),
           ),
         ];
       case 5:
@@ -183,31 +170,31 @@ class PlayerLayer extends GameLayer {
           SeatLayout(alignment: Alignment.bottomCenter, rotation: 0),
           SeatLayout(
             alignment: Alignment.topLeft,
-            rotation: -(math.pi / 180) * 45,
-            textRotation: (math.pi / 180),
-            textOnLeft: false,
-            offset: Offset(-sideOffset, topOffset),
+            rotation: -(math.pi / 180) * 180,
+            textRotation: (math.pi / 180) * 180,
+            textAbove: true,
+            offset: Offset(screenWidth * 0.1, 0),
           ),
           SeatLayout(
             alignment: Alignment.topRight,
-            rotation: (math.pi / 180) * 45,
-            textRotation: -(math.pi / 180),
-            textOnLeft: false,
-            offset: Offset(sideOffset, topOffset),
+            rotation: (math.pi / 180) * 180,
+            textRotation: (math.pi / 180) * 180,
+            textAbove: true,
+            offset: Offset(-screenWidth * 0.1, 0),
           ),
           SeatLayout(
             alignment: Alignment.centerLeft,
             rotation: -(math.pi / 180) * 90,
             textRotation: (math.pi / 180) * 90,
-            textOnLeft: false,
-            offset: Offset(-sideOffset * 1.2, topOffset),
+            textAbove: false,
+            offset: Offset(-screenHeight * 0.1, topOffset),
           ),
           SeatLayout(
             alignment: Alignment.centerRight,
             rotation: (math.pi / 180) * 90,
             textRotation: -(math.pi / 180) * 90,
-            textOnLeft: false,
-            offset: Offset(sideOffset, topOffset),
+            textAbove: false,
+            offset: Offset(screenHeight * 0.1, topOffset),
           ),
         ];
       default:
@@ -218,9 +205,7 @@ class PlayerLayer extends GameLayer {
   List<Widget> _buildOpponentPositions(
     BuildContext context,
     List<SeatLayout> layouts,
-    double scaledCardWidth,
-    double scaledCardHeight,
-    double scaledSpacing,
+    double playerScaleFactor,
   ) {
     final opponents = gameState.players
         .where((p) => p != currentPlayer)
@@ -243,11 +228,9 @@ class PlayerLayer extends GameLayer {
                   child: PlayerArea(
                     player: opponents[i],
                     isCurrentPlayer: false,
-                    cardWidth: scaledCardWidth,
-                    cardHeight: scaledCardHeight,
-                    spacing: scaledSpacing,
+                    scaleFactor: playerScaleFactor,
                     textRotation: layout.textRotation,
-                    textOnLeft: layout.textOnLeft,
+                    textAbove: layout.textAbove,
                     onFaceDownCardTap: onFaceDownCardPlay,
                     onFaceUpCardTap: onCardSwap,
                     onHandCardTap: onCardPlay,

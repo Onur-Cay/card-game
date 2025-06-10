@@ -61,7 +61,43 @@ class HomeScreen extends StatelessWidget {
                   backgroundColor: Colors.white,
                 ),
                 child: const Text(
-                  'Start Game',
+                  'Single Player',
+                  style: TextStyle(fontSize: 24, color: Colors.blue),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Coming Soon'),
+                        content: const Text(
+                          'Multiplayer mode is currently under development. Please try the single player mode for now!',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 50,
+                    vertical: 15,
+                  ),
+                  backgroundColor: Colors.white,
+                ),
+                child: const Text(
+                  'Multiplayer',
                   style: TextStyle(fontSize: 24, color: Colors.blue),
                 ),
               ),

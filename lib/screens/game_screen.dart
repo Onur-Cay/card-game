@@ -23,11 +23,7 @@ class _GameScreenState extends State<GameScreen> {
   late GameState _gameState;
   late Player _currentPlayer;
 
-  // Card dimensions
-  final double _cardWidth = 90.0;
-  final double _cardHeight = 130.0;
-  final double _spacing = 10.0;
-  final double _padding = 20.0;
+  late double _padding;
 
   @override
   void initState() {
@@ -70,28 +66,37 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // In GameScreen's build method
+    final Size screenSize = MediaQuery.of(context).size;
+    final double basePadding = 20.0;
+
+    // Calculate scale factor based on screen width or height (choose one that works best for your layout)
+    // A common approach is to scale based on a "design width"
+    final double designWidth =
+        1280.0; // or 720.0, whatever your main design was for
+    final double scaleFactor = screenSize.width / designWidth;
+
+    _padding = basePadding * scaleFactor;
     return Scaffold(
       body: Stack(
-                    children: [
+        children: [
           // Back button
-                  Positioned(
+          Positioned(
             top: 10,
             left: 10,
             child: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
+            ),
+          ),
           // Board layer (draw pile, discard pile, ready button)
           BoardLayer(
             gameState: _gameState,
             onDrawCard: _handleDrawCard,
             onReady: _handleReady,
-            cardWidth: _cardWidth,
-            cardHeight: _cardHeight,
-            spacing: _spacing,
+            scaleFactor: scaleFactor,
             padding: _padding,
-              ),
+          ),
           // Player layer (all players' cards and positions)
           PlayerLayer(
             gameState: _gameState,
@@ -99,11 +104,9 @@ class _GameScreenState extends State<GameScreen> {
             onCardSwap: _handleCardSwap,
             onFaceDownCardPlay: _handleFaceDownCardPlay,
             onCardPlay: _handleCardPlay,
-            cardWidth: _cardWidth,
-            cardHeight: _cardHeight,
-            spacing: _spacing,
+            scaleFactor: scaleFactor,
             padding: _padding,
-            screenSize: MediaQuery.of(context).size,
+            screenSize: screenSize,
           ),
         ],
       ),
