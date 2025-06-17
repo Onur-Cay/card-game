@@ -1,24 +1,24 @@
-/// HomeScreen
-/// ------------
-/// This is the initial screen of the game app that welcomes the player.
-/// Responsibilities:
-/// - Display the game's title and visual introduction
-/// - Provide navigation to the GameScreen to start the match
-/// - Offer access to Settings (currently a placeholder)
-///
-/// To be completed:
-/// - Add button to choose number of players
-/// - Add button to toggle game rules / how-to-play information
-/// - Integrate player name entry or multiplayer setup if needed
-///
-/// This screen acts as the entry point for all game sessions and configuration.
-library;
-
 import 'package:flutter/material.dart';
 import 'package:card_game/screens/player_setup_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize user ID when the home screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).initializeUserId();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +104,6 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // TODO: Implement how to play screen
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {

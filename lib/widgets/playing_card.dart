@@ -14,7 +14,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class PlayingCard extends StatelessWidget {
   final String assetName; // e.g. 'AS.svg'
