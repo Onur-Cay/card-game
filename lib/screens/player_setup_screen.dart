@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:card_game/screens/game_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:card_game/providers/room_provider.dart';
+import 'package:card_game/providers/user_provider.dart';
 
 class PlayerSetupScreen extends StatefulWidget {
   const PlayerSetupScreen({super.key});
@@ -49,25 +52,49 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
     }
   }
 
-  void _startGame() {
+  Future<void> _startGame() async {
     final playerNames = _controllers
         .map((controller) => controller.text.trim())
         .toList();
 
     // Check if player name is empty
     if (playerNames[0].isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter your name')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your name')),
+      );
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GameScreen(playerNames: playerNames),
-      ),
-    );
+    try {
+      // Get player ID from UserProvider
+      final playerId = context.read<UserProvider>().userId;
+      if (playerId == null) {
+        throw Exception('User ID not initialized');
+      }
+
+      // Start single player game
+      await context.read<RoomProvider>().startSinglePlayerGame(
+        playerName: playerNames[0],
+        playerId: playerId,
+        botCount: _isBot.where((isBot) => isBot).length,
+      );
+
+      // Navigate to game screen with the player names
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameScreen(playerNames: playerNames),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   @override

@@ -1,6 +1,6 @@
 class AppConfig {
   static const String ApiUrl = 'http://localhost:8000'; //Change these in prod
-  static const String WsUrl = 'ws://localhost:8000/ws';
+  static const String WsUrl = 'ws://localhost:8000/ws/game';
 
   static String get apiUrl => ApiUrl;
 

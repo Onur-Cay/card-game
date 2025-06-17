@@ -3,11 +3,25 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
 import 'providers/user_provider.dart';
+import 'providers/websocket_provider.dart';
+import 'providers/room_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   runApp(
-    ChangeNotifierProvider(create: (_) => UserProvider(), child: const MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => WebSocketProvider()),
+        ChangeNotifierProvider(
+          create: (context) => RoomProvider(
+            wsProvider: context.read<WebSocketProvider>(),
+          ),
+        ),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
